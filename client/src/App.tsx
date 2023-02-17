@@ -1,15 +1,15 @@
-import React from 'react';
-import './App.css';
+import { Paper } from "@mui/material";
+import { Box } from "@mui/system";
+import React from "react";
+import Home from "./pages/Home/Home";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-      </header>
-    </div>
+    <Box width="90%" margin="10px auto">
+      <Paper sx={{ padding: 5 }}>
+        <Home />
+      </Paper>
+    </Box>
   );
 }
 
