@@ -1,25 +1,21 @@
-import mimetypes
-import pathlib
-
 import fastapi
+from server import ntpro_server
+from starlette.middleware.cors import CORSMiddleware
 
-import ntpro_server
-
-api = fastapi.FastAPI()
+api = fastapi.FastAPI(title="Market")
 server = ntpro_server.NTProServer()
-html = pathlib.Path('test.html').read_text()
 
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 @api.get('/')
 async def get():
-    return fastapi.responses.HTMLResponse(html)
-
-
-@api.get('/static/{path}')
-async def get(path: pathlib.Path):
-    static_file = (pathlib.Path('static') / path).read_text()
-    mime_type, encoding = mimetypes.guess_type(path)
-    return fastapi.responses.PlainTextResponse(static_file, media_type=mime_type)
+    return "Hello world"
 
 
 @api.websocket('/ws/')

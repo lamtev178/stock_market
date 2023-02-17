@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import uuid
-from typing import TypeVar
+import fastapi
+from typing import TypeVar, Optional
 
 import bidict as bidict
-
-from server import enums
+from server import enums, message_processors
 from server.models.base import Envelope, Message, Quote
 
 
 class ServerMessage(Message):
+    async def process(self: ServerMessage, server, websocket: fastapi.WebSocket) -> ServerMessageT:
+        return await _SERVER_MESSAGE_PROCESSOR_BY_CLASS[self.__class__](server, websocket, self)
+
     def get_type(self: ServerMessageT) -> enums.ServerMessageType:
         return _SERVER_MESSAGE_TYPE_BY_CLASS[self.__class__]
 
@@ -19,6 +22,11 @@ class ErrorInfo(ServerMessage):
 
 
 class SuccessInfo(ServerMessage):
+    message_type: enums.ServerMessageType
+    subscription_id: Optional[uuid.UUID]
+
+
+class CancelOrder(ServerMessage):
     ...
 
 
@@ -45,5 +53,8 @@ _SERVER_MESSAGE_TYPE_BY_CLASS = bidict.bidict({
     ErrorInfo: enums.ServerMessageType.error,
     ExecutionReport: enums.ServerMessageType.execution_report,
     MarketDataUpdate: enums.ServerMessageType.market_data_update,
+})
+_SERVER_MESSAGE_PROCESSOR_BY_CLASS = bidict.bidict({
+    MarketDataUpdate: message_processors.market_data_update
 })
 ServerMessageT = TypeVar('ServerMessageT', bound=ServerMessage)
